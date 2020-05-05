@@ -1,9 +1,11 @@
-#[cfg(test)] extern crate quickcheck;
-#[cfg(test)] extern crate quickcheck_macros;
+#[cfg(test)]
+extern crate quickcheck;
+#[cfg(test)]
+extern crate quickcheck_macros;
 
-type PrefixTable = Vec<Option<usize>>;
+pub type PrefixTable = Vec<Option<usize>>;
 
-fn prepare(needle: &[u8]) -> PrefixTable {
+pub fn prepare(needle: &[u8]) -> PrefixTable {
     let mut prefix_len: Option<usize> = None;
     let mut prefix_table: PrefixTable = Vec::with_capacity(needle.len());
 
@@ -27,7 +29,7 @@ fn prepare(needle: &[u8]) -> PrefixTable {
         } else {
             match prefix_table[match_index] {
                 // Try to extend next prefix
-                Some(len) if needle[i] == needle[len] => Some(len + 1), // FIXME: For some reason when I comment this, QuickCheck does not fail.
+                Some(len) if needle[i] == needle[len] => Some(len + 1), // FIXME: For some reason when I comment this, QuickCheck does not fail. Why?
 
                 // Otherwise start from the beginning
                 _ if needle[i] == needle[0] => Some(1),
@@ -39,8 +41,8 @@ fn prepare(needle: &[u8]) -> PrefixTable {
     prefix_table
 }
 
-fn search(needle: &[u8], prefix_table: &PrefixTable, haystack: &[u8]) -> Option<usize> {
-    if needle.len() == 0 {
+pub fn search(needle: &[u8], prefix_table: &[Option<usize>], haystack: &[u8]) -> Option<usize> {
+    if needle.is_empty() {
         return Some(0);
     }
 
@@ -81,7 +83,17 @@ mod tests {
         assert_eq!(prepare(b"ABC"), vec![None, None, None]);
         assert_eq!(
             prepare(b"ABABABXYZ"),
-            vec![None, None, None, Some(1), Some(2), Some(3), Some(4), None, None]
+            vec![
+                None,
+                None,
+                None,
+                Some(1),
+                Some(2),
+                Some(3),
+                Some(4),
+                None,
+                None
+            ]
         );
         assert_eq!(
             prepare(b"ABCABABC"),
@@ -101,7 +113,7 @@ mod tests {
 
     fn naive_search(needle: &[u8], haystack: &[u8]) -> Option<usize> {
         for i in 0..haystack.len() {
-            if i + needle.len() <= haystack.len() && haystack[i..i+needle.len()] == *needle {
+            if i + needle.len() <= haystack.len() && haystack[i..i + needle.len()] == *needle {
                 return Some(i);
             }
         }
