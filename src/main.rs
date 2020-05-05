@@ -27,7 +27,7 @@ fn prepare(needle: &[u8]) -> PrefixTable {
         } else {
             match prefix_table[match_index] {
                 // Try to extend next prefix
-                Some(len) if needle[i] == needle[len] => Some(len + 1),
+                Some(len) if needle[i] == needle[len] => Some(len + 1), // FIXME: For some reason when I comment this, QuickCheck does not fail.
 
                 // Otherwise start from the beginning
                 _ if needle[i] == needle[0] => Some(1),
