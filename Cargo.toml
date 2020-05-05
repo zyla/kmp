@@ -1,5 +1,5 @@
 [package]
-name = "stringsearch"
+name = "kmp"
 version = "0.1.0"
 authors = ["Maciej Bielecki"]
 edition = "2018"
