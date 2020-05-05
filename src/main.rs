@@ -1,3 +1,6 @@
+#[cfg(test)] extern crate quickcheck;
+#[cfg(test)] extern crate quickcheck_macros;
+
 type PrefixTable = Vec<Option<usize>>;
 
 fn prepare(needle: &[u8]) -> PrefixTable {
@@ -37,6 +40,10 @@ fn prepare(needle: &[u8]) -> PrefixTable {
 }
 
 fn search(needle: &[u8], prefix_table: &PrefixTable, haystack: &[u8]) -> Option<usize> {
+    if needle.len() == 0 {
+        return Some(0);
+    }
+
     let mut s: usize = 0;
     let mut i: usize = 0;
     loop {
@@ -66,6 +73,7 @@ fn search(needle: &[u8], prefix_table: &PrefixTable, haystack: &[u8]) -> Option<
 #[cfg(test)]
 mod tests {
     use super::*;
+    use quickcheck::*;
 
     #[test]
     fn test_prepare() {
@@ -89,6 +97,27 @@ mod tests {
         assert_eq!(search(needle, &prefix_table, b"ABCABCABABC"), Some(3));
         assert_eq!(search(needle, &prefix_table, b"ABXABCABABC"), Some(3));
         assert_eq!(search(needle, &prefix_table, b"XABABCABABC"), Some(3));
+    }
+
+    fn naive_search(needle: &[u8], haystack: &[u8]) -> Option<usize> {
+        for i in 0..haystack.len() {
+            if i + needle.len() <= haystack.len() && haystack[i..i+needle.len()] == *needle {
+                return Some(i);
+            }
+        }
+        None
+    }
+
+    quickcheck! {
+        fn search_matches_naive_search(needle: Vec<u8>, haystack: Vec<u8>) -> TestResult {
+            let expected = naive_search(&needle, &haystack);
+            let actual = search(&needle, &prepare(&needle), &haystack);
+            if expected != actual {
+                TestResult::error(format!("Expected: {:?}, actual: {:?}", expected, actual))
+            } else {
+                TestResult::passed()
+            }
+        }
     }
 }
 
